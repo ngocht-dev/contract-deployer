@@ -11,6 +11,6 @@
     "web3": "^1.8.1"
   },
   "scripts": {
-    "publish": "npm publish --access public"
+    "deploy": "npm publish --access public"
   }
 }
