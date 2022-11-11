@@ -1,0 +1,16 @@
+{
+  "name": "contract-deployer",
+  "version": "1.0.0",
+  "description": "Deploy smartcontracts",
+  "main": "index.js",
+  "repository": "git@gitlab.com:bc-tools/contract-deployer.git",
+  "author": "cuongnp <phucuong1112@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "cli-color": "^2.0.3",
+    "web3": "^1.8.1"
+  },
+  "scripts": {
+    "publish": "npm publish --access public"
+  }
+}
