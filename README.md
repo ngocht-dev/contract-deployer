@@ -57,7 +57,7 @@ module.exports = async function (deployer, network, accounts) {
   // start deploy 
   await contractDeployer.deployAllManifests({
     args: {
-      Token: { initArgs: ["config:usdc.address", "address:MyToken"] }
+      MyGame: { initArgs: ["config:usdc.address", "address:MyToken"] }
     }
   })
 
