@@ -1,6 +1,6 @@
 {
-  "name": "contract-deployer",
-  "version": "1.0.0",
+  "name": "@evmchain/contract-deployer",
+  "version": "1.0.1",
   "description": "Deploy smartcontracts",
   "main": "index.js",
   "repository": "git@gitlab.com:bc-tools/contract-deployer.git",

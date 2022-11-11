@@ -37,7 +37,7 @@ networks: {
 
 ```js
 const Web3 = require('web3');
-const { ContractDeployerWithTruffer } = require('contract-deployer');
+const { ContractDeployerWithTruffer } = require('@evmchain/contract-deployer');
 const { networks } = require('../truffle-config.js')
 
 module.exports = async function (deployer, network, accounts) {
@@ -100,4 +100,10 @@ module.exports = async function (deployer, network, accounts) {
         "usdc.address": "0x80c3a8Bfc9713DB8C3B7562B542745fCf224246a"
     }
 }
+```
+
+## Run deploy
+
+```
+npm run deploy:testnet
 ```
