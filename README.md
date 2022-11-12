@@ -17,10 +17,14 @@
 ## Add network in `truffle-config.js` file
 
 ```
-networks: {
-  "testnet": {
-    provider: 'YOUR PROVIDER',
-    network_id: "*",
+const HDWalletProvider = require('@truffle/hdwallet-provider');
+
+module.exports = {
+  networks: {
+    "testnet": {
+      provider: new HDWalletProvider('MNEMONIC', 'https://goerli.infura.io/v3/', 0, 1, true, "m/44'/60'/0'/0/", 5);,
+      network_id: "*",
+    }
   }
 }
 ```
@@ -57,16 +61,16 @@ module.exports = async function (deployer, network, accounts) {
   // start deploy 
   await contractDeployer.deployAllManifests({
     args: {
-      MyGame: { initArgs: ["config:usdc.address", "address:MyToken"] }
+      MyGame: { initArgs: ["config:usdc.address", "address:MyToken"] } // See params below
     }
   })
 
   await contractDeployer.grantRoles();
 }
 ```
-  - Param:
-    - implArgs
-    - initArgs
+  - Params:
+    - implArgs: parameters to pass to contructor
+    - initArgs: parameters to init proxy
   - Format values:
     - `config:usdc.address` get from config
     - `address:MyToken` address of MyToken

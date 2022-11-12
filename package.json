@@ -1,7 +1,8 @@
 {
   "name": "@evmchain/contract-deployer",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Deploy smartcontracts",
+  "keywords": ["solidity", "truffle", "deploy", "smart contract"],
   "main": "index.js",
   "repository": "git@gitlab.com:bc-tools/contract-deployer.git",
   "author": "cuongnp <phucuong1112@gmail.com>",
