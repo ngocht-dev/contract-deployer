@@ -147,10 +147,13 @@ class ContractDeployerWithTruffer {
       const addresses = this.formatValues(roleData[role])
   
       for (let idx = 0; idx < addresses.length; idx++) {
-        const assigned = await contract.hasRole(roleId, addresses[idx])
-        if (assigned) { console.log(`\tRole ${chalk.blueBright(role)}: ${chalk.green(addresses[idx])} (${chalk.yellowBright('GRANTED')})`) } else {
-          console.log(`\tGrantting role ${chalk.blueBright(role)} for ${chalk.green(addresses[idx])}`)
-          await contract.grantRole(roleId, addresses[idx])
+        let addr = addresses[idx];
+        if (!utils.isNullOrEmpty(addr)) {
+          const assigned = await contract.hasRole(roleId, addr)
+          if (assigned) { console.log(`\tRole ${chalk.blueBright(role)}: ${chalk.green(addr)} (${chalk.yellowBright('GRANTED')})`) } else {
+            console.log(`\tGrantting role ${chalk.blueBright(role)} for ${chalk.green(addr)}`)
+            await contract.grantRole(roleId, addr)
+          }
         }
       }
     }

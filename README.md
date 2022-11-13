@@ -16,7 +16,7 @@
 
 ## Add network in `truffle-config.js` file
 
-```
+```js
 const HDWalletProvider = require('@truffle/hdwallet-provider');
 
 module.exports = {
