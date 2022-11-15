@@ -150,7 +150,9 @@ class ContractDeployerWithTruffer {
         let addr = addresses[idx];
         if (!utils.isNullOrEmpty(addr)) {
           const assigned = await contract.hasRole(roleId, addr)
-          if (assigned) { console.log(`\tRole ${chalk.blueBright(role)}: ${chalk.green(addr)} (${chalk.yellowBright('GRANTED')})`) } else {
+          if (assigned) { 
+            console.log(`\tRole ${chalk.blueBright(role)}: ${chalk.green(addr)} (${chalk.yellowBright('GRANTED')})`) 
+          } else {
             console.log(`\tGrantting role ${chalk.blueBright(role)} for ${chalk.green(addr)}`)
             await contract.grantRole(roleId, addr)
           }
@@ -249,6 +251,10 @@ class ContractDeployerWithTruffer {
     let contract = await this.proxyAdminContract();
     let value = await contract.getProxyImplementation(addr);
     return this.web3.utils.toChecksumAddress(value)
+  }
+
+  async run(func) {
+    await func(this);
   }
 }
 
