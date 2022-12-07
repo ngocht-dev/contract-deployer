@@ -187,6 +187,8 @@ class ContractDeployerWithTruffer {
   }
   
   formatValue(value) {
+    if (value == null || value == undefined) 
+      return null;
     if (typeof (value) === 'string') {
       if (value.startsWith('ether:')) { return web3.utils.toWei(value.substring('ether:'.length)) }
       if (value.startsWith('config:')) {
