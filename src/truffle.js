@@ -143,18 +143,40 @@ class ContractDeployerWithTruffer {
   
     const contract = await this.loadContract(contractName)
     for (const role in roleData) {
+      let isGrant = true;
+      if (role.startsWith("-")) {
+        isGrant = false;
+        role = role.substring(1);
+      }
       const roleId = this.web3.utils.keccak256(role)
       const addresses = this.formatValues(roleData[role])
   
-      for (let idx = 0; idx < addresses.length; idx++) {
-        let addr = addresses[idx];
-        if (!utils.isNullOrEmpty(addr)) {
-          const assigned = await contract.hasRole(roleId, addr)
-          if (assigned) { 
-            console.log(`\tRole ${chalk.blueBright(role)}: ${chalk.green(addr)} (${chalk.yellowBright('GRANTED')})`) 
-          } else {
-            console.log(`\tGrantting role ${chalk.blueBright(role)} for ${chalk.green(addr)}`)
-            await contract.grantRole(roleId, addr)
+      if (isGrant) {
+        // Grant roles
+        for (let idx = 0; idx < addresses.length; idx++) {
+          let addr = addresses[idx];
+          if (!utils.isNullOrEmpty(addr)) {
+            const assigned = await contract.hasRole(roleId, addr)
+            if (assigned) { 
+              console.log(`\tRole ${chalk.blueBright(role)}: ${chalk.green(addr)} (${chalk.yellowBright('GRANTED')})`) 
+            } else {
+              console.log(`\tGrantting role ${chalk.blueBright(role)} for ${chalk.green(addr)}`)
+              await contract.grantRole(roleId, addr)
+            }
+          }
+        }
+      } else {
+        // Revoke roles
+        for (let idx = 0; idx < addresses.length; idx++) {
+          let addr = addresses[idx];
+          if (!utils.isNullOrEmpty(addr)) {
+            const assigned = await contract.hasRole(roleId, addr)
+            if (assigned) { 
+              console.log(`\tRevoking role ${chalk.blueBright(role)} for ${chalk.green(addr)}`)
+              await contract.revokeRole(roleId, addr)
+            } else {
+              console.log(`\tRole ${chalk.blueBright(role)}: ${chalk.green(addr)} (${chalk.yellowBright('NO GRANT')})`) 
+            }
           }
         }
       }
