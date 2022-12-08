@@ -61,9 +61,11 @@ module.exports = async function (deployer, network, accounts) {
   // start deploy 
   await contractDeployer.deployAllManifests({
     args: {
-      MyGame: { initArgs: [
-        "config:usdc.address", 
-        "address:MyToken"] 
+      MyGame: { 
+        initArgs: [
+          "config:usdc.address", 
+          "address:MyToken"
+        ] 
       } // See the format of params below
     }
   })
@@ -96,13 +98,11 @@ module.exports = async function (deployer, network, accounts) {
     "mapping": {},
     "roles": {
         "MyGame": {
-            // Grant roles
             "OPERATOR_ROLE": [
                 "0x7be0B9AEc2e1963C997dee5692a4B44584470A10",
                 "0xb26f0A1dd9c3971A7C5cd67f48C5059A0e1cdA80",
                 "0x549A523C18F9CFF9Cf50F2f3317abAd479B8f416"
             ],
-            // Revoke roles by adding minus before role name
             "-OPERATOR_ROLE": [
                 "0x692e2a431f051885f3badecf10c0562d1d195974"
             ]
@@ -113,6 +113,7 @@ module.exports = async function (deployer, network, accounts) {
     }
 }
 ```
+* Revoke role by adding minus symbol before the role name
 
 ## Run deploy
 
