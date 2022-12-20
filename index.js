@@ -1,5 +1,5 @@
-const ContractDeployerWithTruffer = require('./src/truffle');
+const ContractDeployerWithTruffle = require('./src/truffle');
 
 module.exports = {
-  ContractDeployerWithTruffer
+  ContractDeployerWithTruffle
 }

@@ -3,7 +3,7 @@ const fs = require('fs');
 const chalk = require('cli-color');
 const utils = require('./utils');
 
-class ContractDeployerWithTruffer {
+class ContractDeployerWithTruffle {
   constructor({ artifacts, deployer}) {
     this.artifacts = artifacts;
     this.deployer = deployer;
@@ -282,4 +282,4 @@ class ContractDeployerWithTruffer {
   }
 }
 
-module.exports = ContractDeployerWithTruffer;
+module.exports = ContractDeployerWithTruffle;

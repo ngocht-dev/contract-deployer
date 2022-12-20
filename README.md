@@ -41,7 +41,7 @@ module.exports = {
 
 ```js
 const Web3 = require('web3');
-const { ContractDeployerWithTruffer } = require('@evmchain/contract-deployer');
+const { ContractDeployerWithTruffle } = require('@evmchain/contract-deployer');
 const { networks } = require('../truffle-config.js')
 
 module.exports = async function (deployer, network, accounts) {
@@ -54,7 +54,7 @@ module.exports = async function (deployer, network, accounts) {
     proxyName: "MyProxy"
   }
 
-  const contractDeployer = new ContractDeployerWithTruffer({artifacts, deployer});
+  const contractDeployer = new ContractDeployerWithTruffle({artifacts, deployer});
   contractDeployer.setWeb3(web3);
   contractDeployer.setConfig(deployConfig);
 
