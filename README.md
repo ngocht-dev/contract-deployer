@@ -1,5 +1,10 @@
 # How to use
 
+- [Deploy with Truffe](#deploy-with-truffle)
+- [Deploy with Hardhat](#deploy-with-hardhat)
+
+# Deploy with Truffle
+
 ## File structure
 
 ```
@@ -41,7 +46,7 @@ module.exports = {
 
 ```js
 const Web3 = require('web3');
-const { ContractDeployerWithTruffle } = require('@evmchain/contract-deployer');
+const ContractDeployerWithTruffle = require('@evmchain/contract-deployer/src/truffle');
 const { networks } = require('../truffle-config.js')
 
 module.exports = async function (deployer, network, accounts) {
@@ -114,6 +119,9 @@ module.exports = async function (deployer, network, accounts) {
 }
 ```
 * Revoke role by adding minus symbol before the role name
+
+# Deploy with Hardhat
+
 
 ## Run deploy
 

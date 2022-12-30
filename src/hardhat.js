@@ -4,15 +4,25 @@ const chalk = require('cli-color');
 const ContractDeployer = require('./contract-deployer');
 const utils = require('./utils');
 
-class ContractDeployerWithTruffle extends ContractDeployer {
-  constructor({ artifacts, deployer}) {
+const hre = require('hardhat')
+const { ethers } = hre
+const { web3 } = require('hardhat')
+
+class ContractDeployerWithHardhat extends ContractDeployer {
+  constructor() {
     super();
-    this.artifacts = artifacts;
-    this.deployer = deployer;
+    // this.artifacts = artifacts;
+    // this.deployer = deployer;
+    // this.contractMapping = {
+    //   contracts: {},
+    //   status: {}
+    // };
+
+    this.network = hre.network.name;
   }
 
-  setWeb3(web3) {
-    this.web3 = web3;
+  async init() {
+    this.accounts = await hre.ethers.getSigners();
   }
 
   setConfig({dataFilename, deployData, proxyAdminName, proxyName}) {
@@ -41,7 +51,8 @@ class ContractDeployerWithTruffle extends ContractDeployer {
   }) {
     let manifest = this.deployData.contracts[name]
     this.PROXY_ADMIN_CONTRACT = this.deployData.contracts[this.proxyAdminName]
-    this.Proxy = this.artifacts.require(this.proxyName);
+    // this.Proxy = this.artifacts.require(this.proxyName);
+    this.Proxy = await ethers.getContractFactory(this.proxyName);
   
     if (manifest == undefined) {
       console.log('Manifest not found: ', name)
@@ -71,10 +82,12 @@ class ContractDeployerWithTruffle extends ContractDeployer {
         manifest.proxy = proxy.address
         this.writeJson(this.deployData)
   
-        const proxiedContract = await contract.at(proxy.address)
+        // const proxiedContract = await contract.at(proxy.address)
+        const proxiedContract = await contract.attach(proxy.address)
         console.log(`[${chalk.yellow(name)} proxy] initialize proxy: ${chalk.green(manifest.proxy)}...`)
-        // await (await proxiedContract.initialize(...initArgs)).wait()
-        await proxiedContract.initialize(...initArgs)
+        // console.log('proxiedContract :>> ', proxiedContract);
+        await (await proxiedContract.initialize(...initArgs)).wait()
+        // await proxiedContract.initialize(...initArgs)
       } else if (utils.isNullOrEmpty(manifest.impl)) {
         // update the new impl contract for the proxy
         manifest.impl = this.addressOf(impl)
@@ -84,8 +97,8 @@ class ContractDeployerWithTruffle extends ContractDeployer {
         // let proxyContract = await Proxy.attach(manifest.proxy);
         console.log(`[${chalk.yellow(name)} proxy] set impl logic: ${chalk.green(manifest.impl)}...`)
         // await proxyContract.connect(PROXY_ADMIN).upgradeTo(manifest.impl);
-        // await (await proxyAdminContract.upgrade(manifest.proxy, manifest.impl)).wait()
-        await proxyAdminContract.upgrade(manifest.proxy, manifest.impl)
+        await (await proxyAdminContract.upgrade(manifest.proxy, manifest.impl)).wait()
+        // await proxyAdminContract.upgrade(manifest.proxy, manifest.impl)
       } else {
         // checking if the impl contract is complied with the proxy
         const currentImpl = await this.getImpl(proxy)
@@ -93,8 +106,8 @@ class ContractDeployerWithTruffle extends ContractDeployer {
   
         if (currentImpl != jsonImpl) {
           console.log(`[${chalk.yellow(name)} proxy] set impl logic from ${currentImpl} -> ${chalk.green(jsonImpl)}...`)
-          // await (await proxyAdminContract.upgrade(manifest.proxy, jsonImpl)).wait()
-          await proxyAdminContract.upgrade(manifest.proxy, jsonImpl)
+          await (await proxyAdminContract.upgrade(manifest.proxy, jsonImpl)).wait()
+          // await proxyAdminContract.upgrade(manifest.proxy, jsonImpl)
         }
       }
   
@@ -115,7 +128,9 @@ class ContractDeployerWithTruffle extends ContractDeployer {
       return address
     }
     console.log(`\tDeploy contract: ${chalk.blueBright(name)}, args: `, args)
-    const ins = await this.deployer.deploy(contract,...args)
+    // const ins = await this.deployer.deploy(contract,...args)
+    const ins = await contract.deploy(...args)
+    await ins.deployed()
   
     // Disable verify
     // if (!isNullOrEmpty(process.env.ETHERSCAN_API_KEY)) {
@@ -146,7 +161,7 @@ class ContractDeployerWithTruffle extends ContractDeployer {
         isGrant = false;
         role = role.substring(1);
       }
-      const roleId = this.web3.utils.keccak256(role)
+      const roleId = web3.utils.keccak256(role)
       const addresses = this.formatValues(roleData[role])
   
       if (isGrant) {
@@ -159,7 +174,7 @@ class ContractDeployerWithTruffle extends ContractDeployer {
               console.log(`\tRole ${chalk.blueBright(role)}: ${chalk.green(addr)} (${chalk.yellowBright('GRANTED')})`) 
             } else {
               console.log(`\tGrantting role ${chalk.blueBright(role)} for ${chalk.green(addr)}`)
-              await contract.grantRole(roleId, addr)
+              await (await contract.grantRole(roleId, addr)).wait()
             }
           }
         }
@@ -188,7 +203,8 @@ class ContractDeployerWithTruffle extends ContractDeployer {
 
   async loadContractArtifact (name) {
     const artifactName = this.contractName(name);
-    const contract = this.artifacts.require(artifactName);
+    // const contract = this.artifacts.require(artifactName);
+    const contract = await ethers.getContractFactory(artifactName);
     return contract
   }
 
@@ -263,7 +279,8 @@ class ContractDeployerWithTruffle extends ContractDeployer {
 
   async contractOf(contract, value) {
     if (typeof value === 'object') { return value }
-    return await contract.at(value);
+    // return await contract.at(value);
+    return await contract.attach(value)
   }
 
   async getImpl(proxy) {
@@ -272,7 +289,7 @@ class ContractDeployerWithTruffle extends ContractDeployer {
     // value = value.replace('0x000000000000000000000000', '0x')
     let contract = await this.proxyAdminContract();
     let value = await contract.getProxyImplementation(addr);
-    return this.web3.utils.toChecksumAddress(value)
+    return web3.utils.toChecksumAddress(value)
   }
 
   async run(func) {
@@ -280,4 +297,4 @@ class ContractDeployerWithTruffle extends ContractDeployer {
   }
 }
 
-module.exports = ContractDeployerWithTruffle;
+module.exports = ContractDeployerWithHardhat;

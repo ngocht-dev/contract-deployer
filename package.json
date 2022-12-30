@@ -2,13 +2,19 @@
   "name": "@evmchain/contract-deployer",
   "version": "1.2.0",
   "description": "Deploy smartcontracts",
-  "keywords": ["solidity", "truffle", "deploy", "smart contract"],
+  "keywords": [
+    "solidity",
+    "truffle",
+    "deploy",
+    "smart contract"
+  ],
   "main": "index.js",
   "repository": "git@gitlab.com:bc-tools/contract-deployer.git",
   "author": "cuongnp <phucuong1112@gmail.com>",
   "license": "MIT",
   "dependencies": {
     "cli-color": "^2.0.3",
+    "hardhat": "^2.12.5",
     "web3": "^1.8.1"
   },
   "scripts": {
