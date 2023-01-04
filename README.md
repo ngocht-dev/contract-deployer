@@ -77,7 +77,7 @@ module.exports = async function (deployer, network, accounts) {
         ] 
       } // See the format of params below
     }
-  })
+  });
 
   await contractDeployer.grantRoles();
 }
@@ -152,23 +152,22 @@ module.exports = {
 ## Add deploy script in `deploy.js`
 
 ```js
-const { ContractDeployerWithTruffle } = require('@evmchain/contract-deployer');
-const { networks }                    = require('../truffle-config.js');
+const hre = require("hardhat");
+const { ethers } = hre
+const { web3 } = require('hardhat')
+const { ContractDeployerWithHardhat } = require('@evmchain/contract-deployer');
 
-module.exports = async function (deployer, network, accounts) {
-  const { provider } = (networks[network] || {})
-  if (!provider) {
-    throw new Error(`Unable to find provider for network: ${network}`)
-  }
-
+async function main() {
+  network = hre.network.name
+  
   const deployConfig = {
     dataFilename: `./network/${network}.json`,
     deployData: require(`../network/${network}.json`),
     proxyAdminName: "MyProxyAdmin",
     proxyName: "MyProxy"
   }
- 
-  const contractDeployer = new ContractDeployerWithTruffle({artifacts, deployer});
+
+  const contractDeployer = new ContractDeployerWithHardhat();
   contractDeployer.setConfig(deployConfig);
 
   // Init
@@ -188,6 +187,14 @@ module.exports = async function (deployer, network, accounts) {
   // Grant roles
   await contractDeployer.grantRoles();
 }
+
+// We recommend this pattern to be able to use async/await everywhere
+// and properly handle errors.
+main().catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});
+
 ```
   - See more in [Configuring deployment manifest](#configuring-deployment-manifest)
 
