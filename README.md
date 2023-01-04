@@ -2,6 +2,8 @@
 
 - [Deploy with Truffe](#deploy-with-truffle)
 - [Deploy with Hardhat](#deploy-with-hardhat)
+- [Configuring network file](#configuring-network-file)
+- [Configuring deployment manifest](#configuring-deployment-manifest)
 
 # Deploy with Truffle
 
@@ -63,7 +65,9 @@ module.exports = async function (deployer, network, accounts) {
   contractDeployer.setWeb3(web3);
   contractDeployer.setConfig(deployConfig);
 
-  // start deploy 
+  // Initialize
+  await contractDeployer.init();
+  // Start deploy 
   await contractDeployer.deployAllManifests({
     args: {
       MyGame: { 
@@ -78,17 +82,127 @@ module.exports = async function (deployer, network, accounts) {
   await contractDeployer.grantRoles();
 }
 ```
-  - Params:
-    - implArgs: parameters to pass to contructor
-    - initArgs: parameters to init proxy
-  - Format values:
-    - `config:usdc.address` get from config
-    - `address:MyToken` address of MyToken
-    - `ether:1` convert to wei
-    - `keccak:` get keccak value
+  - See more in [Configuring deployment manifest](#configuring-deployment-manifest)
 
 
 ## Create `testnet.json` file
+
+- See [Configuring network file](#configuring-network-file)
+
+## Run deploy
+
+```
+npm run deploy:testnet
+```
+
+# Deploy with Hardhat
+
+## File structure
+
+```
+├── contracts
+│   ├── MyProxy.sol
+│   └── MyProxyAdmin.sol
+├── scripts
+│   └── deploy.js
+├── network
+│   └── testnet.json
+├── package.json
+├── hardhat.config.js
+```
+
+## Add network in `hardhat.config.js` file
+
+```ts
+require('dotenv').config()
+require("@nomicfoundation/hardhat-toolbox");
+require('@nomiclabs/hardhat-ethers')
+require('@nomiclabs/hardhat-etherscan')
+require('@nomiclabs/hardhat-web3')
+
+/** @type import('hardhat/config').HardhatUserConfig */
+module.exports = {
+  solidity: {
+    version: '0.8.7',
+    settings: {
+      optimizer: {
+        enabled: true,
+        runs: 200
+      }
+    }
+  },
+  networks: {
+    "testnet": {
+      url: "http://127.0.0.1:8545/",
+      accounts: ['YOUR-PRIVATE-KEY']
+    }
+  }
+};
+
+```
+
+## Update package.json 
+
+```json
+"scripts": {
+  "deploy:testnet": "npx hardhat run scripts/deploy.js --network testnet",
+}
+```
+
+## Add deploy script in `deploy.js`
+
+```js
+const { ContractDeployerWithTruffle } = require('@evmchain/contract-deployer');
+const { networks }                    = require('../truffle-config.js');
+
+module.exports = async function (deployer, network, accounts) {
+  const { provider } = (networks[network] || {})
+  if (!provider) {
+    throw new Error(`Unable to find provider for network: ${network}`)
+  }
+
+  const deployConfig = {
+    dataFilename: `./network/${network}.json`,
+    deployData: require(`../network/${network}.json`),
+    proxyAdminName: "MyProxyAdmin",
+    proxyName: "MyProxy"
+  }
+ 
+  const contractDeployer = new ContractDeployerWithTruffle({artifacts, deployer});
+  contractDeployer.setConfig(deployConfig);
+
+  // Init
+  await contractDeployer.init();
+  // Deploy contract
+  await contractDeployer.deployAllManifests({
+    args: {
+      MyGame: { 
+        initArgs: [
+          "config:usdc.address", 
+          "address:MyToken"
+        ] 
+      } // See the format of params below
+    }
+  });
+
+  // Grant roles
+  await contractDeployer.grantRoles();
+}
+```
+  - See more in [Configuring deployment manifest](#configuring-deployment-manifest)
+
+
+## Create `testnet.json` file
+
+- See [Configuring network file](#configuring-network-file)
+
+## Run deploy
+
+```
+npm run deploy:testnet
+```
+
+# Configuring network file
 
 ```json
 {
@@ -120,11 +234,25 @@ module.exports = async function (deployer, network, accounts) {
 ```
 * Revoke role by adding minus symbol before the role name
 
-# Deploy with Hardhat
+# Configuring deployment manifest
 
-
-## Run deploy
-
+```javascript
+  await contractDeployer.deployAllManifests({
+    args: {
+      MyGame: { 
+        initArgs: [
+          "config:usdc.address", 
+          "address:MyToken"
+        ] 
+      } // See the format of params below
+    }
+  })
 ```
-npm run deploy:testnet
-```
+  - Params:
+    - implArgs: parameters to pass to contructor
+    - initArgs: parameters to init proxy
+  - Format values:
+    - `config:usdc.address` get from config
+    - `address:MyToken` address of MyToken
+    - `ether:1` convert to wei
+    - `keccak:` get keccak value
