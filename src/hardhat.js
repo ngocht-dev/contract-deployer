@@ -2,14 +2,22 @@ const chalk = require('cli-color');
 const ContractDeployer = require('./contract-deployer');
 const utils = require('./utils');
 
+const hre = require('hardhat')
+const { ethers } = hre
+const { web3 } = require('hardhat')
+
 /**
- * Deploy smartcontract by using Truffle
+ * Deploy smartcontract by using hardhat
  */
-class ContractDeployerWithTruffle extends ContractDeployer {
-  constructor({ artifacts, deployer}) {
+class ContractDeployerWithHardhat extends ContractDeployer {
+  constructor() {
     super();
-    this.artifacts = artifacts;
-    this.deployer = deployer;
+    this.network = hre.network.name;
+  }
+
+  async init() {
+    super.init();
+    this.accounts = await hre.ethers.getSigners();
   }
 
   async deploy(name, contract, address, ...args) {
@@ -18,7 +26,8 @@ class ContractDeployerWithTruffle extends ContractDeployer {
       return address
     }
     console.log(`\tDeploy contract: ${chalk.blueBright(name)}, args: `, args)
-    const ins = await this.deployer.deploy(contract,...args)
+    const ins = await contract.deploy(...args)
+    await ins.deployed()
   
     // Disable verify
     // if (!isNullOrEmpty(process.env.ETHERSCAN_API_KEY)) {
@@ -35,15 +44,15 @@ class ContractDeployerWithTruffle extends ContractDeployer {
 
   async loadContractArtifact (name) {
     const artifactName = this.contractName(name);
-    const contract = this.artifacts.require(artifactName);
+    const contract = await ethers.getContractFactory(artifactName);
     return contract
   }
 
   async contractOf(contract, value) {
     if (typeof value === 'object') { return value }
-    return await contract.at(value);
+    return await contract.attach(value)
   }
 
 }
 
-module.exports = ContractDeployerWithTruffle;
+module.exports = ContractDeployerWithHardhat;
