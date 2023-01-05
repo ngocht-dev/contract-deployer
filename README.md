@@ -52,7 +52,9 @@ const { networks } = require('../truffle-config.js')
 
 module.exports = async function (deployer, network, accounts) {
   const { provider } = (networks[network] || {})
-  const deployConfig = {
+  const web3 = new Web3(provider);
+
+const deployConfig = {
     dataFilename: `./network/${network}.json`,
     deployData: require(`../network/${network}.json`),
     proxyAdminName: "MyProxyAdmin",
@@ -60,6 +62,7 @@ module.exports = async function (deployer, network, accounts) {
   }
 
   const contractDeployer = new ContractDeployerWithTruffle({artifacts, deployer});
+  contractDeployer.setWeb3(web3);
   contractDeployer.setConfig(deployConfig);
 
   // Initialize

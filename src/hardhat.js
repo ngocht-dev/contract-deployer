@@ -20,6 +20,10 @@ class ContractDeployerWithHardhat extends ContractDeployer {
     this.accounts = await hre.ethers.getSigners();
   }
 
+  getWeb3() {
+    return web3;
+  }
+
   async deploy(name, contract, address, ...args) {
     if (!utils.isNullOrEmpty(address)) {
       console.log(`[${chalk.yellow(name)}] at ${chalk.green(address)}`)
