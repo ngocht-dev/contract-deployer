@@ -47,13 +47,11 @@ module.exports = {
 ## Add deploy script in `1_deploy.js`
 
 ```js
-const Web3 = require('web3');
-const ContractDeployerWithTruffle = require('@evmchain/contract-deployer/src/truffle');
+const { ContractDeployerWithTruffle } = require('@evmchain/contract-deployer');
 const { networks } = require('../truffle-config.js')
 
 module.exports = async function (deployer, network, accounts) {
   const { provider } = (networks[network] || {})
-  const web3 = new Web3(provider);
   const deployConfig = {
     dataFilename: `./network/${network}.json`,
     deployData: require(`../network/${network}.json`),
@@ -62,7 +60,6 @@ module.exports = async function (deployer, network, accounts) {
   }
 
   const contractDeployer = new ContractDeployerWithTruffle({artifacts, deployer});
-  contractDeployer.setWeb3(web3);
   contractDeployer.setConfig(deployConfig);
 
   // Initialize
