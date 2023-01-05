@@ -1,10 +1,8 @@
-const chalk = require('cli-color');
+const chalk            = require('cli-color');
+const hre              = require('hardhat')
 const ContractDeployer = require('./contract-deployer');
-const utils = require('./utils');
+const utils            = require('./utils');
 
-const hre = require('hardhat')
-const { ethers } = hre
-const { web3 } = require('hardhat')
 
 /**
  * Deploy smartcontract by using hardhat
@@ -21,7 +19,7 @@ class ContractDeployerWithHardhat extends ContractDeployer {
   }
 
   getWeb3() {
-    return web3;
+    return hre.web3;
   }
 
   async deploy(name, contract, address, ...args) {

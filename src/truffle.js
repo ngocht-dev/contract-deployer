@@ -1,6 +1,6 @@
-const chalk = require('cli-color');
+const chalk            = require('cli-color');
 const ContractDeployer = require('./contract-deployer');
-const utils = require('./utils');
+const utils            = require('./utils');
 
 /**
  * Deploy smartcontract by using Truffle
