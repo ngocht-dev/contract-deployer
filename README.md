@@ -47,18 +47,19 @@ module.exports = {
 ## Add deploy script in `1_deploy.js`
 
 ```js
-const { ContractDeployerWithTruffle } = require('@evmchain/contract-deployer');
-const { networks } = require('../truffle-config.js')
+const Web3                        = require('web3');
+const ContractDeployerWithTruffle = require('@evmchain/contract-deployer/src/truffle');
+const { networks }                = require('../truffle-config.js')
 
 module.exports = async function (deployer, network, accounts) {
   const { provider } = (networks[network] || {})
-  const web3 = new Web3(provider);
+  const web3         = new Web3(provider);
 
-const deployConfig = {
-    dataFilename: `./network/${network}.json`,
-    deployData: require(`../network/${network}.json`),
+  const deployConfig = {
+    dataFilename  : `./network/${network}.json`,
+    deployData    : require(`../network/${network}.json`),
     proxyAdminName: "MyProxyAdmin",
-    proxyName: "MyProxy"
+    proxyName     : "MyProxy"
   }
 
   const contractDeployer = new ContractDeployerWithTruffle({artifacts, deployer});
@@ -152,19 +153,19 @@ module.exports = {
 ## Add deploy script in `deploy.js`
 
 ```js
-const hre = require("hardhat");
-const { ethers } = hre
-const { web3 } = require('hardhat')
+const hre                             = require("hardhat");
+const { ethers }                      = hre
+const { web3 }                        = require('hardhat')
 const { ContractDeployerWithHardhat } = require('@evmchain/contract-deployer');
 
 async function main() {
   network = hre.network.name
   
   const deployConfig = {
-    dataFilename: `./network/${network}.json`,
-    deployData: require(`../network/${network}.json`),
+    dataFilename  : `./network/${network}.json`,
+    deployData    : require(`../network/${network}.json`),
     proxyAdminName: "MyProxyAdmin",
-    proxyName: "MyProxy"
+    proxyName     : "MyProxy"
   }
 
   const contractDeployer = new ContractDeployerWithHardhat();

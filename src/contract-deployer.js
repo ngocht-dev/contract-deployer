@@ -1,6 +1,5 @@
-const fs = require('fs');
+const fs    = require('fs');
 const chalk = require('cli-color');
-const hre = require('hardhat')
 const utils = require('./utils');
 
 /**
