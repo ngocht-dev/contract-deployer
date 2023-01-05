@@ -1,8 +1,6 @@
 const fs = require('fs');
 const chalk = require('cli-color');
 const hre = require('hardhat')
-const { ethers } = hre
-const { web3 } = require('hardhat')
 const utils = require('./utils');
 
 /**
@@ -17,6 +15,10 @@ class ContractDeployer {
   }
 
   async init() {
+  }
+
+  getWeb3() {
+    return null;
   }
 
   setConfig({dataFilename, deployData, proxyAdminName, proxyName}) {
@@ -127,7 +129,7 @@ class ContractDeployer {
         isGrant = false;
         role = role.substring(1);
       }
-      const roleId = web3.utils.keccak256(role)
+      const roleId = this.getWeb3().utils.keccak256(role)
       const addresses = this.formatValues(roleData[role])
   
       if (isGrant) {
@@ -187,13 +189,13 @@ class ContractDeployer {
     if (value == null || value == undefined) 
       return null;
     if (typeof (value) === 'string') {
-      if (value.startsWith('ether:')) { return web3.utils.toWei(value.substring('ether:'.length)) }
+      if (value.startsWith('ether:')) { return this.getWeb3().utils.toWei(value.substring('ether:'.length)) }
       if (value.startsWith('config:')) {
         const name = value.substring('config:'.length)
         return this.formatValue(this.deployData.config[name])
       }
       if (value.startsWith('keccak:')) {
-        return web3.utils.keccak256(value.substring('keccak:'.length))
+        return this.getWeb3().utils.keccak256(value.substring('keccak:'.length))
       }
       if (value.startsWith('address:')) {
         const name = value.substring('address:'.length)
@@ -246,7 +248,7 @@ class ContractDeployer {
     // value = value.replace('0x000000000000000000000000', '0x')
     let contract = await this.proxyAdminContract();
     let value = await contract.getProxyImplementation(addr);
-    return web3.utils.toChecksumAddress(value)
+    return this.getWeb3().utils.toChecksumAddress(value)
   }
 
   async run(func) {

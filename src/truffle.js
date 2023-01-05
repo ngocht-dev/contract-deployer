@@ -12,6 +12,14 @@ class ContractDeployerWithTruffle extends ContractDeployer {
     this.deployer = deployer;
   }
 
+  setWeb3(web3) {
+    this.web3 = web3;
+  }
+
+  getWeb3() {
+    return this.web3;
+  }
+
   async deploy(name, contract, address, ...args) {
     if (!utils.isNullOrEmpty(address)) {
       console.log(`[${chalk.yellow(name)}] at ${chalk.green(address)}`)
