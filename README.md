@@ -58,8 +58,8 @@ module.exports = async function (deployer, network, accounts) {
   const deployConfig = {
     dataFilename  : `./network/${network}.json`,
     deployData    : require(`../network/${network}.json`),
-    proxyAdminName: "MyProxyAdmin",
-    proxyName     : "MyProxy"
+    proxyAdminName: "MyProxyAdmin", // You can change to the name of your proxy admin contract (Make sure 'isAdminOf' function is supported).
+    proxyName     : "MyProxy" // You can change to the name of your proxy contract.
   }
 
   const contractDeployer = new ContractDeployerWithTruffle({artifacts, deployer});
@@ -164,8 +164,8 @@ async function main() {
   const deployConfig = {
     dataFilename  : `./network/${network}.json`,
     deployData    : require(`../network/${network}.json`),
-    proxyAdminName: "MyProxyAdmin",
-    proxyName     : "MyProxy"
+    proxyAdminName: "MyProxyAdmin", // You can change to the name of your proxy admin contract (Make sure 'isAdminOf' function is supported).
+    proxyName     : "MyProxy" // You can change to the name of your proxy contract.
   }
 
   const contractDeployer = new ContractDeployerWithHardhat();
