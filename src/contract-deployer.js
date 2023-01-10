@@ -2,6 +2,9 @@ const fs    = require('fs');
 const chalk = require('cli-color');
 const utils = require('./utils');
 
+const _defaultOptions = {
+};
+
 /**
  * Abstract class for deploying smartcontract
  */
@@ -20,11 +23,12 @@ class ContractDeployer {
     return null;
   }
 
-  setConfig({dataFilename, deployData, proxyAdminName, proxyName}) {
+  setConfig({dataFilename, deployData, proxyAdminName, proxyName, options = {}}) {
     this.dataFilename = dataFilename;
     this.deployData = deployData;
     this.proxyAdminName = proxyAdminName;
     this.proxyName = proxyName;
+    this.options = Object.assign({}, _defaultOptions, options);
   }
 
   async deployAllManifests({
@@ -65,8 +69,22 @@ class ContractDeployer {
     if (typeof manifest === 'object') {
       // manifest is a proxy item
       const impl = await this.deploy(name, contract, this.formatValue(manifest.impl), ...implArgs)
-      const proxy = await this.deploy(name + ' proxy', this.Proxy,
+      let contructorParamLen = 2;
+      if ( this.isTruffle()) {
+        const proxyConstructor = this.Proxy.toJSON().abi.filter(item => item.type == 'constructor')[0];
+        contructorParamLen = proxyConstructor.inputs.length;
+      } else {
+        contructorParamLen = this.Proxy.interface.deploy.inputs.length;
+      }
+      
+      let proxy;
+      if (contructorParamLen == 3) {
+        proxy = await this.deploy(name + ' proxy', this.Proxy,
+        manifest.proxy, this.addressOf(impl), this.PROXY_ADMIN_CONTRACT, [])
+      } else {
+        proxy = await this.deploy(name + ' proxy', this.Proxy,
         manifest.proxy, this.addressOf(impl), this.PROXY_ADMIN_CONTRACT)
+      }
   
       const proxyAdminContract = await this.updateProxyAdmin(proxy)
   
@@ -256,6 +274,14 @@ class ContractDeployer {
 
   async waitFor(obj) {
     return Promise.resolve(obj);
+  }
+
+  isHardhat() {
+    return this.type == 'hardhat';
+  }
+
+  isTruffle() {
+    return this.type == 'truffle';
   }
 }
 

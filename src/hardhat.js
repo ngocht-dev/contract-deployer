@@ -11,6 +11,7 @@ class ContractDeployerWithHardhat extends ContractDeployer {
   constructor() {
     super();
     this.network = hre.network.name;
+    this.type = "hardhat";
   }
 
   async init() {
