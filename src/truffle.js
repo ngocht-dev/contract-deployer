@@ -10,6 +10,7 @@ class ContractDeployerWithTruffle extends ContractDeployer {
     super();
     this.artifacts = artifacts;
     this.deployer = deployer;
+    this.type = 'truffle';
   }
 
   setWeb3(web3) {
