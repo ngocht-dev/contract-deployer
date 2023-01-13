@@ -142,12 +142,12 @@ class ContractDeployer {
     const contract = await this.loadContract(contractName)
     for (let role in roleData) {
       let isGrant = true;
+      const addresses = this.formatValues(roleData[role])
       if (role.startsWith("-")) {
         isGrant = false;
         role = role.substring(1);
       }
       const roleId = this.getWeb3().utils.keccak256(role)
-      const addresses = this.formatValues(roleData[role])
   
       if (isGrant) {
         // Grant roles
