@@ -264,3 +264,18 @@ npm run deploy:testnet
     - `address:MyToken` address of MyToken
     - `ether:1` convert to wei
     - `keccak:` get keccak value
+  - Support libraries
+```javascript
+  await contractDeployer.deployAllManifests({
+    args: {
+      MyGame: { 
+        initArgs: [
+          "config:usdc.address", 
+          "address:MyToken"
+        ],
+        libs: ["MyLibrary"]
+      } // See the format of params below
+    }
+  })
+```
+    (*) Need to add MyLibrary to json file before the smart contract `MyGame`
