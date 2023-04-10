@@ -38,7 +38,14 @@ class ContractDeployer {
     exclusion = exclusion || []
     for (const name in this.deployData.contracts) {
       const args = margs[name] || {}
-      if (!name.startsWith('@') && !exclusion.includes(name)) { await this.deployManifest({ name: name, implArgs: args.implArgs || [], initArgs: args.initArgs || [] }) }
+      if (!name.startsWith('@') && !exclusion.includes(name)) { 
+        await this.deployManifest({ 
+          name: name, 
+          implArgs: args.implArgs || [], 
+          initArgs: args.initArgs || [],
+          libs: args.libs || [] 
+        }) 
+      }
     }
   }
 
@@ -46,6 +53,7 @@ class ContractDeployer {
     name, // (mandatory) name of an item to deploy
     implArgs,
     initArgs,
+    libs,
     bind // (optional) return the bound contract instance to deployed address
   }) {
     let manifest = this.deployData.contracts[name]
@@ -56,14 +64,26 @@ class ContractDeployer {
       console.log('Manifest not found: ', name)
       return undefined
     }
+    
+    libs     = this.formatValues(libs)
   
     console.log(`\nContract ${chalk.yellowBright(name)} (${chalk.yellow(this.contractName(name))})`)
-    const contract = await this.loadContractArtifact(name).catch(err => { console.log(`No artifact ${name}`) })
+    const contract = await this.loadContractArtifact(name, libs).catch(err => { console.log(`No artifact ${name}`) })
     if (contract == null || contract == undefined) { return null }
-  
+
     implArgs = this.formatValues(implArgs)
     initArgs = this.formatValues(initArgs)
-  
+
+    // Link libraries
+    if (libs && libs.length > 0) {
+      for (let lib of libs) {
+        console.log(`\nLink contract ${chalk.yellowBright(name)} to lib ${chalk.yellow(this.contractName(lib))}`)
+        let libArtifact = await this.loadContractArtifact(lib).catch(err => { console.log(`No artifact ${lib}`) });
+        libArtifact = await this.contractOf(libArtifact, this.deployData.contracts[lib]);
+        await this.linkLib(contract, libArtifact);
+      }
+    }
+
     let result = null
   
     if (typeof manifest === 'object') {
@@ -79,11 +99,22 @@ class ContractDeployer {
       
       let proxy;
       if (contructorParamLen == 3) {
-        proxy = await this.deploy(name + ' proxy', this.Proxy,
-        manifest.proxy, this.addressOf(impl), this.PROXY_ADMIN_CONTRACT, [])
+        proxy = await this.deploy(
+          name + ' proxy', 
+          this.Proxy,
+          manifest.proxy, 
+          this.addressOf(impl), 
+          this.PROXY_ADMIN_CONTRACT, 
+          []
+        );
       } else {
-        proxy = await this.deploy(name + ' proxy', this.Proxy,
-        manifest.proxy, this.addressOf(impl), this.PROXY_ADMIN_CONTRACT)
+        proxy = await this.deploy(
+          name + ' proxy', 
+          this.Proxy,
+          manifest.proxy, 
+          this.addressOf(impl), 
+          this.PROXY_ADMIN_CONTRACT
+        );
       }
   
       const proxyAdminContract = await this.updateProxyAdmin(proxy)
