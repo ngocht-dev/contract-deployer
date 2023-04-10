@@ -45,10 +45,25 @@ class ContractDeployerWithHardhat extends ContractDeployer {
     return ins
   }
 
-  async loadContractArtifact (name) {
+  async linkLib(contract, libArtifact) {
+    // nope
+  }
+
+  async loadContractArtifact (name, libs = []) {
     const artifactName = this.contractName(name);
-    const contract = await ethers.getContractFactory(artifactName);
-    return contract
+
+    if (libs && libs.length > 0) {
+      const libraries = [];
+      for (let lib of libs) {
+        console.log(`\nLink contract ${chalk.yellowBright(name)} to lib ${chalk.yellow(this.contractName(lib))}`)
+        libraries[lib] = this.deployData.contracts[lib];
+      }
+      const contract = await ethers.getContractFactory(artifactName, { libraries });
+      return contract
+    } else {
+      const contract = await ethers.getContractFactory(artifactName);
+      return contract
+    }
   }
 
   async contractOf(contract, value) {

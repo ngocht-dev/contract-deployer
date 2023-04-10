@@ -42,7 +42,11 @@ class ContractDeployerWithTruffle extends ContractDeployer {
     return ins
   }
 
-  async loadContractArtifact (name) {
+  async linkLib(contract, libArtifact) {
+    await this.deployer.link(libArtifact, contract);
+  }
+
+  async loadContractArtifact (name, libs = []) {
     const artifactName = this.contractName(name);
     const contract = this.artifacts.require(artifactName);
     return contract
