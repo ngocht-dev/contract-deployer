@@ -33,15 +33,15 @@ class ContractDeployerWithHardhat extends ContractDeployer {
     await ins.deployed()
   
     // Disable verify
-    // if (!isNullOrEmpty(process.env.ETHERSCAN_API_KEY)) {
-    //   await hre.run('verify:verify', {
-    //     address: ins.address,
-    //     constructorArguments: args
-    //   }).catch(err => {
-    //     console.error('Unable to verify source: ', err)
-    //     console.log('constructor arguments: ', args)
-    //   })
-    // }
+    if (!utils.isNullOrEmpty(process.env.VERIFY_SOURCE)) {
+      await hre.run('verify:verify', {
+        address: ins.address,
+        constructorArguments: args
+      }).catch(err => {
+        console.error('Unable to verify source: ', err.message);
+        console.log('constructor arguments: ', args);
+      })
+    }
     return ins
   }
 
