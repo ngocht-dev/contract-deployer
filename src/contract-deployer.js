@@ -255,6 +255,8 @@ class ContractDeployer {
       }
     }
     if (Array.isArray(value)) { return this.formatValues(value) }
+    if (typeof(value) === 'boolean' || typeof(value) === 'number')
+      return value;
     return value.toString()
   }
 
