@@ -214,6 +214,76 @@ class ContractDeployer {
     }
   }
 
+  async updateConfig(key, getter, setter) {
+    let configValue = this.formatValue(`config:${key}`);
+    let contractValue = await getter();
+    if (configValue != contractValue) {
+      console.log(`${key} : ${chalk.white(contractValue)} [config: ${chalk.yellow(configValue)}]`)
+      let tx = await (await setter(configValue)).wait();
+      console.log(`--> ${chalk.yellow("update TxId")}: ${chalk.blueBright(tx.transactionHash)}`)
+    } else {
+      console.log(`${key} : ${chalk.greenBright(contractValue)}`);
+    }
+  }
+
+  /**
+   * 
+   * @param {str} contractName contract name to configure.
+   * @param {any} configManifest array of config items or a function that retruns an array of config items.
+   * @returns 
+   */
+  async updateContractConfig(contractName, configManifest) {
+    if (this.deployData.contracts[contractName] == undefined)
+      return;
+
+    if (utils.isNullOrEmpty(configManifest)) {
+      configManifest = [];
+      let configPrefix = contractName.toLowerCase() + '.';
+      for (const key in this.deployData.config)
+        if (key.startsWith(configPrefix)) 
+          configManifest.push(key);
+    }
+
+    let sc = await this.loadContract(contractName);
+    let manifests = Array.isArray(configManifest) ? configManifest : configManifest(sc);
+    for (const idx in manifests) {
+      let manifest = manifests[idx]
+      if (typeof(manifest) === 'string')
+        manifest = this.parseConfig(contractName, manifest);
+      if (Array.isArray(manifest)) {
+        let setterValue = manifest.length > 2 ? manifest[2] : this.inferSetterName(manifest[1]);
+        let getter = typeof(manifest[1]) === 'string' ? sc[manifest[1]] : manifest[1];
+        let setter = typeof(setterValue) === 'string' ? sc[setterValue] : setterValue;
+        await this.updateConfig(manifest[0], getter, setter);
+      }
+      else
+        await this.updateConfig(manifest.key, manifest.getter, manifest.setter);
+    }
+  }
+
+  parseConfig(contractName, data) {
+    if (typeof(data) === 'string') {
+      let keys = data.split('/');
+      let dotIdx = keys[0].indexOf('.');
+      let key = dotIdx >= 0 ? keys[0] : contractName.toLowerCase() + '.' + keys[0];
+      if (dotIdx >= 0)
+        keys[0] = keys[0].substring(dotIdx + 1);
+      if (keys.length > 1)
+        var getter = keys[1] == 'get' ? this.inferSetterName(keys[0], 'get') : keys[1];
+      else
+        var getter = keys[0].toUpperCase();
+      let setter = keys.length > 2 ? keys[2] : this.inferSetterName(keys[0]);  
+      return [key, getter, setter];
+    } else if (Array.isArray(data)) {
+      let result = [];
+      for(let i = 0; i < data.length; i++) {
+        result.push(this.parseConfig(contractName, data[i]));
+      }
+      return result;
+    } else 
+      throw new Error('Unkndow data type: ' + typeof(data));
+  }
+
   writeJson(data) {
     const content = JSON.stringify(data, null, 4);
     fs.writeFileSync(this.dataFilename, content);
@@ -258,6 +328,20 @@ class ContractDeployer {
     if (typeof(value) === 'boolean' || typeof(value) === 'number')
       return value;
     return value.toString()
+  }
+
+  /**
+   * 
+   * @param {string} name 
+   * @param {string} prefix
+   */
+  inferSetterName(name, prefix = 'set') {
+    if (name.startsWith('get'))
+      name = name.substring(3);
+    if (name.indexOf('_') >= 0)
+      name = name.toLowerCase();
+    name = prefix + '_' + name;
+    return name.replace(/[-_]+(.)?/g, (_, g) => g ? g.toUpperCase(): '');
   }
 
   addressOf(contract) {
