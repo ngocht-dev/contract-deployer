@@ -32,11 +32,10 @@ class ContractDeployerWithHardhat extends ContractDeployer {
     const ins = await contract.deploy(...args)
     await ins.waitForDeployment()
 
-    ins.address = await this.addressOf(ins);
     // Disable verify
     if (!utils.isNullOrEmpty(process.env.VERIFY_SOURCE)) {
       await hre.run('verify:verify', {
-        address: ins.address,
+        address:  await this.addressOf(ins),
         constructorArguments: args
       }).catch(err => {
         console.error('Unable to verify source: ', err.message);

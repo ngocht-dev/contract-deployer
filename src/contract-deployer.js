@@ -103,7 +103,7 @@ class ContractDeployer {
           name + ' proxy',
           this.Proxy,
           manifest.proxy,
-          this.addressOf(impl),
+          await this.addressOf(impl),
           this.PROXY_ADMIN_CONTRACT,
           []
         );
@@ -112,7 +112,7 @@ class ContractDeployer {
           name + ' proxy',
           this.Proxy,
           manifest.proxy,
-          this.addressOf(impl),
+          await this.addressOf(impl),
           this.PROXY_ADMIN_CONTRACT
         );
       }
@@ -132,8 +132,8 @@ class ContractDeployer {
         console.log(`\t\t(TxId: ${chalk.blue(tx.hash || tx.tx)})`)
       } else if (utils.isNullOrEmpty(manifest.impl)) {
         // update the new impl contract for the proxy
-        manifest.impl = this.addressOf(impl)
-        manifest.proxy = this.addressOf(proxy)
+        manifest.impl = await this.addressOf(impl)
+        manifest.proxy = await this.addressOf(proxy)
         this.writeJson(this.deployData)
 
         console.log(`[${chalk.yellow(name)} proxy] set impl logic: ${chalk.green(manifest.impl)}...`)
@@ -155,7 +155,7 @@ class ContractDeployer {
       result = await this.contractOf(contract, manifest.proxy)
     } else {
       result = await this.deploy(name, contract, manifest, ...implArgs)
-      this.deployData.contracts[name] = this.addressOf(result)
+      this.deployData.contracts[name] = await this.addressOf(result)
       this.writeJson(this.deployData)
     }
     this.contractMapping.contracts[name] = result
@@ -352,12 +352,10 @@ class ContractDeployer {
 
   async updateProxyAdmin(proxy) {
     const proxyAdmin = await this.proxyAdminContract()
-    if (!(await proxyAdmin.isAdminOf(this.addressOf(proxy)))) {
-      console.log(`\tUpdate proxy admin to ${this.proxyAdminName} contract...`, this.addressOf(proxyAdmin))
-      const proxyContract = await this.contractOf(this.Proxy, this.addressOf(proxy))
-      // await proxyContract.connect(PROXY_ADMIN).changeAdmin(addressOf(proxyAdmin))
-      // let tx = await this.waitFor(await proxyContract.connect(this.PROXY_ADMIN_CONTRACT).changeAdmin(this.addressOf(proxyAdmin)))
-      let tx = await this.waitFor(await proxyContract.changeAdmin(this.addressOf(proxyAdmin)))
+    if (!(await proxyAdmin.isAdminOf(await this.addressOf(proxy)))) {
+      console.log(`\tUpdate proxy admin to ${this.proxyAdminName} contract...`, await this.addressOf(proxyAdmin))
+      const proxyContract = await this.contractOf(this.Proxy, await this.addressOf(proxy))
+      let tx = await this.waitFor(await proxyContract.changeAdmin(await this.addressOf(proxyAdmin)))
       console.log(`\t\t(TxId: ${chalk.blue(tx.hash || tx.tx)})`)
     }
     return proxyAdmin
@@ -378,7 +376,7 @@ class ContractDeployer {
   }
 
   async getImpl(proxy) {
-    const addr = this.addressOf(proxy)
+    const addr = await this.addressOf(proxy)
     // let value = await hre.ethers.provider.getStorageAt(addr, '0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc')
     // value = value.replace('0x000000000000000000000000', '0x')
     let contract = await this.proxyAdminContract();
