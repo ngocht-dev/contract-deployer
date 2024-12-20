@@ -1,4 +1,4 @@
-const fs    = require('fs');
+const fs = require('fs');
 const chalk = require('cli-color');
 const utils = require('./utils');
 
@@ -23,7 +23,7 @@ class ContractDeployer {
     return null;
   }
 
-  setConfig({dataFilename, deployData, proxyAdminName, proxyName, options = {}}) {
+  setConfig({ dataFilename, deployData, proxyAdminName, proxyName, options = {} }) {
     this.dataFilename = dataFilename;
     this.deployData = deployData;
     this.proxyAdminName = proxyAdminName;
@@ -38,13 +38,13 @@ class ContractDeployer {
     exclusion = exclusion || []
     for (const name in this.deployData.contracts) {
       const args = margs[name] || {}
-      if (!name.startsWith('@') && !exclusion.includes(name)) { 
-        await this.deployManifest({ 
-          name: name, 
-          implArgs: args.implArgs || [], 
+      if (!name.startsWith('@') && !exclusion.includes(name)) {
+        await this.deployManifest({
+          name: name,
+          implArgs: args.implArgs || [],
           initArgs: args.initArgs || [],
-          libs: args.libs || [] 
-        }) 
+          libs: args.libs || []
+        })
       }
     }
   }
@@ -59,14 +59,14 @@ class ContractDeployer {
     let manifest = this.deployData.contracts[name]
     this.PROXY_ADMIN_CONTRACT = this.deployData.contracts[this.proxyAdminName]
     this.Proxy = await this.loadContractArtifact(this.proxyName);
-  
+
     if (manifest == undefined) {
       console.log('Manifest not found: ', name)
       return undefined
     }
-    
-    libs     = this.formatValues(libs)
-  
+
+    libs = this.formatValues(libs)
+
     console.log(`\nContract ${chalk.yellowBright(name)} (${chalk.yellow(this.contractName(name))})`)
     const contract = await this.loadContractArtifact(name, libs).catch(err => { console.log(`No artifact ${name}`) })
     if (contract == null || contract == undefined) { return null }
@@ -85,46 +85,47 @@ class ContractDeployer {
     }
 
     let result = null
-  
+
     if (typeof manifest === 'object') {
       // manifest is a proxy item
       const impl = await this.deploy(name, contract, this.formatValue(manifest.impl), ...implArgs)
       let contructorParamLen = 2;
-      if ( this.isTruffle()) {
+      if (this.isTruffle()) {
         const proxyConstructor = this.Proxy.toJSON().abi.filter(item => item.type == 'constructor')[0];
         contructorParamLen = proxyConstructor.inputs.length;
       } else {
         contructorParamLen = this.Proxy.interface.deploy.inputs.length;
       }
-      
+
       let proxy;
       if (contructorParamLen == 3) {
         proxy = await this.deploy(
-          name + ' proxy', 
+          name + ' proxy',
           this.Proxy,
-          manifest.proxy, 
-          this.addressOf(impl), 
-          this.PROXY_ADMIN_CONTRACT, 
+          manifest.proxy,
+          this.addressOf(impl),
+          this.PROXY_ADMIN_CONTRACT,
           []
         );
       } else {
         proxy = await this.deploy(
-          name + ' proxy', 
+          name + ' proxy',
           this.Proxy,
-          manifest.proxy, 
-          this.addressOf(impl), 
+          manifest.proxy,
+          this.addressOf(impl),
           this.PROXY_ADMIN_CONTRACT
         );
       }
-  
+
       const proxyAdminContract = await this.updateProxyAdmin(proxy)
-  
+
       if (utils.isNullOrEmpty(manifest.proxy)) {
         // initialize the proxy with given args
         if (utils.isNullOrEmpty(manifest.impl)) { manifest.impl = this.addressOf(impl) }
+        proxy.address = await this.addressOf(proxy);
         manifest.proxy = proxy.address
         this.writeJson(this.deployData)
-  
+
         const proxiedContract = await this.contractOf(contract, proxy.address)
         console.log(`[${chalk.yellow(name)} proxy] initialize proxy: ${chalk.green(manifest.proxy)}...`)
         let tx = await this.waitFor(await proxiedContract.initialize(...initArgs));
@@ -134,7 +135,7 @@ class ContractDeployer {
         manifest.impl = this.addressOf(impl)
         manifest.proxy = this.addressOf(proxy)
         this.writeJson(this.deployData)
-  
+
         console.log(`[${chalk.yellow(name)} proxy] set impl logic: ${chalk.green(manifest.impl)}...`)
         let tx = await this.waitFor(await proxyAdminContract.upgrade(manifest.proxy, manifest.impl));
         console.log(`\t\t(TxId: ${chalk.blue(tx.hash || tx.tx)})`)
@@ -142,14 +143,14 @@ class ContractDeployer {
         // checking if the impl contract is complied with the proxy
         const currentImpl = await this.getImpl(proxy)
         const jsonImpl = this.formatValue(manifest.impl)
-  
+
         if (currentImpl != jsonImpl) {
           console.log(`[${chalk.yellow(name)} proxy] set impl logic from ${currentImpl} -> ${chalk.green(jsonImpl)}...`)
           let tx = await this.waitFor(await proxyAdminContract.upgrade(manifest.proxy, jsonImpl));
           console.log(`\t\t(TxId: ${chalk.blue(tx.hash || tx.tx)})`)
         }
       }
-  
+
       // result = bind ? await contractOf(contract, proxy) : proxy
       result = await this.contractOf(contract, manifest.proxy)
     } else {
@@ -159,7 +160,7 @@ class ContractDeployer {
     }
     this.contractMapping.contracts[name] = result
     return result
-  }  
+  }
 
   async grantRoles() {
     for (const contractName in this.deployData.roles) {
@@ -169,7 +170,7 @@ class ContractDeployer {
 
   async grantRole(contractName, roleData) {
     console.log(`\nRole configuration for ${chalk.yellow(contractName)}...`)
-  
+
     const contract = await this.loadContract(contractName)
     for (let role in roleData) {
       let isGrant = true;
@@ -179,15 +180,15 @@ class ContractDeployer {
         role = role.substring(1);
       }
       const roleId = this.getWeb3().utils.keccak256(role)
-  
+
       if (isGrant) {
         // Grant roles
         for (let idx = 0; idx < addresses.length; idx++) {
           let addr = addresses[idx];
           if (!utils.isNullOrEmpty(addr)) {
             const assigned = await contract.hasRole(roleId, addr)
-            if (assigned) { 
-              console.log(`\tRole ${chalk.blueBright(role)}: ${chalk.green(addr)} (${chalk.yellowBright('GRANTED')})`) 
+            if (assigned) {
+              console.log(`\tRole ${chalk.blueBright(role)}: ${chalk.green(addr)} (${chalk.yellowBright('GRANTED')})`)
             } else {
               console.log(`\t${chalk.green('Granting')} role ${chalk.blueBright(role)} for ${chalk.green(addr)}`)
               let tx = await this.waitFor(await contract.grantRole(roleId, addr));
@@ -201,12 +202,12 @@ class ContractDeployer {
           let addr = addresses[idx];
           if (!utils.isNullOrEmpty(addr)) {
             const assigned = await contract.hasRole(roleId, addr)
-            if (assigned) { 
+            if (assigned) {
               console.log(`\t${chalk.redBright('Revoking')} role ${chalk.blueBright(role)} for ${chalk.green(addr)}`)
               let tx = await this.waitFor(await contract.revokeRole(roleId, addr));
               console.log(`\t\t(TxId: ${chalk.blue(tx.hash || tx.tx)})`)
             } else {
-              console.log(`\tRole ${chalk.blueBright(role)}: ${chalk.green(addr)} (${chalk.yellowBright('NO GRANT')})`) 
+              console.log(`\tRole ${chalk.blueBright(role)}: ${chalk.green(addr)} (${chalk.yellowBright('NO GRANT')})`)
             }
           }
         }
@@ -240,7 +241,7 @@ class ContractDeployer {
       configManifest = [];
       let configPrefix = contractName.toLowerCase() + '.';
       for (const key in this.deployData.config)
-        if (key.startsWith(configPrefix)) 
+        if (key.startsWith(configPrefix))
           configManifest.push(key);
     }
 
@@ -248,12 +249,12 @@ class ContractDeployer {
     let manifests = Array.isArray(configManifest) ? configManifest : configManifest(sc);
     for (const idx in manifests) {
       let manifest = manifests[idx]
-      if (typeof(manifest) === 'string')
+      if (typeof (manifest) === 'string')
         manifest = this.parseConfig(contractName, manifest);
       if (Array.isArray(manifest)) {
         let setterValue = manifest.length > 2 ? manifest[2] : this.inferSetterName(manifest[1]);
-        let getter = typeof(manifest[1]) === 'string' ? sc[manifest[1]] : manifest[1];
-        let setter = typeof(setterValue) === 'string' ? sc[setterValue] : setterValue;
+        let getter = typeof (manifest[1]) === 'string' ? sc[manifest[1]] : manifest[1];
+        let setter = typeof (setterValue) === 'string' ? sc[setterValue] : setterValue;
         await this.updateConfig(manifest[0], getter, setter);
       }
       else
@@ -262,7 +263,7 @@ class ContractDeployer {
   }
 
   parseConfig(contractName, data) {
-    if (typeof(data) === 'string') {
+    if (typeof (data) === 'string') {
       let keys = data.split('/');
       let dotIdx = keys[0].indexOf('.');
       let key = dotIdx >= 0 ? keys[0] : contractName.toLowerCase() + '.' + keys[0];
@@ -272,16 +273,16 @@ class ContractDeployer {
         var getter = keys[1] == 'get' ? this.inferSetterName(keys[0], 'get') : keys[1];
       else
         var getter = keys[0].toUpperCase();
-      let setter = keys.length > 2 ? keys[2] : this.inferSetterName(keys[0]);  
+      let setter = keys.length > 2 ? keys[2] : this.inferSetterName(keys[0]);
       return [key, getter, setter];
     } else if (Array.isArray(data)) {
       let result = [];
-      for(let i = 0; i < data.length; i++) {
+      for (let i = 0; i < data.length; i++) {
         result.push(this.parseConfig(contractName, data[i]));
       }
       return result;
-    } else 
-      throw new Error('Unkndow data type: ' + typeof(data));
+    } else
+      throw new Error('Unkndow data type: ' + typeof (data));
   }
 
   writeJson(data) {
@@ -302,9 +303,9 @@ class ContractDeployer {
     }
     return result
   }
-  
+
   formatValue(value) {
-    if (value == null || value == undefined) 
+    if (value == null || value == undefined)
       return null;
     if (typeof (value) === 'string') {
       if (value.startsWith('ether:')) { return this.getWeb3().utils.toWei(value.substring('ether:'.length)) }
@@ -318,14 +319,14 @@ class ContractDeployer {
       if (value.startsWith('address:')) {
         const name = value.substring('address:'.length)
         const manifest = this.deployData.contracts[name]
-        if ( typeof(manifest) == 'object') { 
-          return manifest.proxy 
+        if (typeof (manifest) == 'object') {
+          return manifest.proxy
         }
         return manifest
       }
     }
     if (Array.isArray(value)) { return this.formatValues(value) }
-    if (typeof(value) === 'boolean' || typeof(value) === 'number')
+    if (typeof (value) === 'boolean' || typeof (value) === 'number')
       return value;
     return value.toString()
   }
@@ -341,11 +342,11 @@ class ContractDeployer {
     if (name.indexOf('_') >= 0)
       name = name.toLowerCase();
     name = prefix + '_' + name;
-    return name.replace(/[-_]+(.)?/g, (_, g) => g ? g.toUpperCase(): '');
+    return name.replace(/[-_]+(.)?/g, (_, g) => g ? g.toUpperCase() : '');
   }
 
-  addressOf(contract) {
-    if (typeof contract === 'object') { return contract.address }
+  async addressOf(contract) {
+    if (typeof contract === 'object') { return await contract.getAddress() }
     return contract
   }
 

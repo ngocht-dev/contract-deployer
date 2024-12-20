@@ -1,7 +1,7 @@
-const chalk            = require('cli-color');
-const hre              = require('hardhat')
+const chalk = require('cli-color');
+const hre = require('hardhat')
 const ContractDeployer = require('./contract-deployer');
-const utils            = require('./utils');
+const utils = require('./utils');
 
 
 /**
@@ -31,7 +31,8 @@ class ContractDeployerWithHardhat extends ContractDeployer {
     console.log(`\tDeploy contract: ${chalk.blueBright(name)}, args: `, args)
     const ins = await contract.deploy(...args)
     await ins.waitForDeployment()
-  
+
+    ins.address = await this.addressOf(ins);
     // Disable verify
     if (!utils.isNullOrEmpty(process.env.VERIFY_SOURCE)) {
       await hre.run('verify:verify', {
@@ -49,7 +50,7 @@ class ContractDeployerWithHardhat extends ContractDeployer {
     // nope
   }
 
-  async loadContractArtifact (name, libs = []) {
+  async loadContractArtifact(name, libs = []) {
     const artifactName = this.contractName(name);
 
     if (libs && libs.length > 0) {
