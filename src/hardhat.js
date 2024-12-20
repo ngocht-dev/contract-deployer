@@ -30,7 +30,7 @@ class ContractDeployerWithHardhat extends ContractDeployer {
     }
     console.log(`\tDeploy contract: ${chalk.blueBright(name)}, args: `, args)
     const ins = await contract.deploy(...args)
-    await ins.deployed()
+    await ins.waitForDeployment()
   
     // Disable verify
     if (!utils.isNullOrEmpty(process.env.VERIFY_SOURCE)) {
