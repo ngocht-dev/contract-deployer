@@ -1,0 +1,40 @@
+{
+    "contracts": {
+        "DmtpProxyAdmin": "0xe91630143bFdFDF2c952430f4450Bb7498033D30",
+        "Key": {
+            "proxy": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+            "impl": {}
+        },
+        "DmtpTech": {
+            "proxy": "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9",
+            "impl": {}
+        }
+    },
+    "mapping": {},
+    "roles": {
+        "Key": {
+            "MINTER_ROLE": [
+                "address:DmtpTech"
+            ]
+        },
+        "DmtpTech": {}
+    },
+    "accounts": [
+        {
+            "address": "0x6456c60b4dcf19931bdc24686230abbaf90180b2",
+            "privateKey": "7b900a42d90e91b0af01957bf02bfb1884723e1b23fa61fd080609634c6b9583"
+        },
+        {
+            "address": "0xD70D0c2354EaAEf7FfAa4388C0E03Cc54Aca2970",
+            "privateKey": "79b23b08fc4a446b92d07aef4b39fa58d54fea9b5a7275e6a9efc2577cf63a7c"
+        }
+    ],
+    "config": {
+        "Key.uri": "",
+        "Key.issueLimit": 4,
+        "DmtpTech.signer": "0x6456c60b4dcf19931bdc24686230abbaf90180b2",
+        "DmtpTech.commission.rate": 1000,
+        "DmtpTech.commission.receiver": "0x6456c60b4dcf19931bdc24686230abbaf90180b2",
+        "DmtpTech.commission.keyGeneratorRate": 500
+    }
+}

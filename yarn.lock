@@ -744,6 +744,16 @@
   resolved "https://registry.npmjs.org/@nomiclabs/hardhat-web3/-/hardhat-web3-2.0.1.tgz"
   integrity sha512-PfIiMUL5xWpkkt1Gvfb8qJ4DUtqU++rTh/B/80aONwTniSoT12YlXQukdZoHGlpD1IBEG9y4+0OULRnWz5ywLQ==
 
+"@openzeppelin/contracts-upgradeable@^5.1.0":
+  version "5.1.0"
+  resolved "https://registry.npmjs.org/@openzeppelin/contracts-upgradeable/-/contracts-upgradeable-5.1.0.tgz"
+  integrity sha512-AIElwP5Ck+cslNE+Hkemf5SxjJoF4wBvvjxc27Rp+9jaPs/CLIaUBMYe1FNzhdiN0cYuwGRmYaRHmmntuiju4Q==
+
+"@openzeppelin/contracts@5.1.0":
+  version "5.1.0"
+  resolved "https://registry.npmjs.org/@openzeppelin/contracts/-/contracts-5.1.0.tgz"
+  integrity sha512-p1ULhl7BXzjjbha5aqst+QMLY+4/LCWADXOCsmLHRM77AqiPjnd9vvUN9sosUfhL9JGKpZ0TjEGxgvnizmWGSA==
+
 "@openzeppelin/defender-sdk-base-client@^1.14.4", "@openzeppelin/defender-sdk-base-client@^1.15.2":
   version "1.15.2"
   resolved "https://registry.npmjs.org/@openzeppelin/defender-sdk-base-client/-/defender-sdk-base-client-1.15.2.tgz"
@@ -800,6 +810,11 @@
     minimist "^1.2.7"
     proper-lockfile "^4.1.1"
     solidity-ast "^0.4.51"
+
+"@prb/math@^4.1.0":
+  version "4.1.0"
+  resolved "https://registry.npmjs.org/@prb/math/-/math-4.1.0.tgz"
+  integrity sha512-ef5Xrlh3BeX4xT5/Wi810dpEPq2bYPndRxgFIaKSU1F/Op/s8af03kyom+mfU7gEpvfIZ46xu8W0duiHplbBMg==
 
 "@scure/base@~1.1.0", "@scure/base@~1.1.6":
   version "1.1.9"
