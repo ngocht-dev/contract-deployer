@@ -1,8 +1,7 @@
-const chalk = require('cli-color');
-const hre = require('hardhat')
-const ContractDeployer = require('./contract-deployer');
-const utils = require('./utils');
-
+const chalk = require("cli-color");
+const hre = require("hardhat");
+const ContractDeployer = require("./contract-deployer");
+const utils = require("./utils");
 
 /**
  * Deploy smartcontract by using hardhat
@@ -25,24 +24,26 @@ class ContractDeployerWithHardhat extends ContractDeployer {
 
   async deploy(name, contract, address, ...args) {
     if (!utils.isNullOrEmpty(address)) {
-      console.log(`[${chalk.yellow(name)}] at ${chalk.green(address)}`)
-      return address
+      console.log(`[${chalk.yellow(name)}] at ${chalk.green(address)}`);
+      return address;
     }
-    console.log(`\tDeploy contract: ${chalk.blueBright(name)}, args: `, args)
-    const ins = await contract.deploy(...args)
-    await ins.waitForDeployment()
+    console.log(`\tDeploy contract: ${chalk.blueBright(name)}, args: `, args);
+    const ins = await contract.deploy(...args);
+    await ins.waitForDeployment();
 
     // Disable verify
     if (!utils.isNullOrEmpty(process.env.VERIFY_SOURCE)) {
-      await hre.run('verify:verify', {
-        address:  await this.addressOf(ins),
-        constructorArguments: args
-      }).catch(err => {
-        console.error('Unable to verify source: ', err.message);
-        console.log('constructor arguments: ', args);
-      })
+      await hre
+        .run("verify:verify", {
+          address: await this.addressOf(ins),
+          constructorArguments: args,
+        })
+        .catch((err) => {
+          console.error("Unable to verify source: ", err.message);
+          console.log("constructor arguments: ", args);
+        });
     }
-    return ins
+    return ins;
   }
 
   async linkLib(contract, libArtifact) {
@@ -55,22 +56,29 @@ class ContractDeployerWithHardhat extends ContractDeployer {
     if (libs && libs.length > 0) {
       const libraries = [];
       for (let lib of libs) {
-        console.log(`\nLink contract ${chalk.yellowBright(name)} to lib ${chalk.yellow(this.contractName(lib))}`)
+        console.log(
+          `\nLink contract ${chalk.yellowBright(name)} to lib ${chalk.yellow(
+            this.contractName(lib)
+          )}`
+        );
         libraries[lib] = this.deployData.contracts[lib];
       }
-      const contract = await ethers.getContractFactory(artifactName, { libraries });
-      return contract
+      const contract = await hre.ethers.getContractFactory(artifactName, {
+        libraries,
+      });
+      return contract;
     } else {
-      const contract = await ethers.getContractFactory(artifactName);
-      return contract
+      const contract = await hre.ethers.getContractFactory(artifactName);
+      return contract;
     }
   }
 
   async contractOf(contract, value) {
-    if (typeof value === 'object') { return value }
-    return await contract.attach(value)
+    if (typeof value === "object") {
+      return value;
+    }
+    return await contract.attach(value);
   }
-
 }
 
 module.exports = ContractDeployerWithHardhat;
