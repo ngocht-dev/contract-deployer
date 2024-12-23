@@ -156,61 +156,67 @@ class ContractDeployer {
 
       const proxyAdminContract = await this.updateProxyAdmin(proxyAdress);
 
-      // if (utils.isNullOrEmpty(manifest.proxy)) {
-      //   // initialize the proxy with given args
-      //   if (utils.isNullOrEmpty(manifest.impl)) {
-      //     manifest.impl = this.addressOf(impl);
-      //   }
-      //   proxy.address = await this.addressOf(proxy);
-      //   manifest.proxy = proxy.address;
-      //   this.writeJson(this.deployData);
+      if (utils.isNullOrEmpty(manifest.proxy)) {
+        // initialize the proxy with given args
+        if (utils.isNullOrEmpty(manifest.impl)) {
+          manifest.impl = this.addressOf(impl);
+        }
+        proxy.address = await this.addressOf(proxy);
+        manifest.proxy = proxy.address;
+        this.writeJson(this.deployData);
+        const proxiedContract = await this.contractOf(contract, proxy.address);
+        console.log(
+          `[${chalk.yellow(name)} proxy] initialize proxy: ${chalk.green(
+            manifest.proxy
+          )}...`
+        );
+        let tx = await this.waitFor(
+          await proxiedContract.initialize(...initArgs)
+        );
+        console.log(`\t\t(TxId: ${chalk.blue(tx.hash || tx.tx)})`);
+      } else if (utils.isNullOrEmpty(manifest.impl)) {
+        // update the new impl contract for the proxy
+        manifest.impl = await this.addressOf(impl);
+        manifest.proxy = await this.addressOf(proxy);
+        this.writeJson(this.deployData);
+        console.log(
+          `[${chalk.yellow(name)} proxy] set impl logic: ${chalk.green(
+            manifest.impl
+          )}...`
+        );
+        let tx = await this.waitFor(
+          await proxyAdminContract.upgradeAndCall(
+            manifest.proxy,
+            manifest.impl,
+            "0x"
+          )
+        );
+        console.log(`\t\t(TxId: ${chalk.blue(tx.hash || tx.tx)})`);
+      } else {
+        // checking if the impl contract is complied with the proxy
+        const currentImpl = await this.getImpl(proxy);
+        const jsonImpl = this.formatValue(manifest.impl);
+        if (currentImpl != jsonImpl) {
+          console.log(
+            `[${chalk.yellow(
+              name
+            )} proxy] set impl logic from ${currentImpl} -> ${chalk.green(
+              jsonImpl
+            )}...`
+          );
+          console.log(manifest.proxy, JSON.stringify(manifest.impl));
+          let tx = await this.waitFor(
+            await proxyAdminContract.upgradeAndCall(
+              manifest.proxy,
+              jsonImpl,
+              "0x"
+            )
+          );
+          console.log(`\t\t(TxId: ${chalk.blue(tx.hash || tx.tx)})`);
+        }
+      }
 
-      //   const proxiedContract = await this.contractOf(contract, proxy.address);
-      //   console.log(
-      //     `[${chalk.yellow(name)} proxy] initialize proxy: ${chalk.green(
-      //       manifest.proxy
-      //     )}...`
-      //   );
-      //   let tx = await this.waitFor(
-      //     await proxiedContract.initialize(...initArgs)
-      //   );
-      //   console.log(`\t\t(TxId: ${chalk.blue(tx.hash || tx.tx)})`);
-      // } else if (utils.isNullOrEmpty(manifest.impl)) {
-      //   // update the new impl contract for the proxy
-      //   manifest.impl = await this.addressOf(impl);
-      //   manifest.proxy = await this.addressOf(proxy);
-      //   this.writeJson(this.deployData);
-
-      //   console.log(
-      //     `[${chalk.yellow(name)} proxy] set impl logic: ${chalk.green(
-      //       manifest.impl
-      //     )}...`
-      //   );
-      //   let tx = await this.waitFor(
-      //     await proxyAdminContract.upgrade(manifest.proxy, manifest.impl)
-      //   );
-      //   console.log(`\t\t(TxId: ${chalk.blue(tx.hash || tx.tx)})`);
-      // } else {
-      //   // checking if the impl contract is complied with the proxy
-      //   const currentImpl = await this.getImpl(proxy);
-      //   const jsonImpl = this.formatValue(manifest.impl);
-
-      //   if (currentImpl != jsonImpl) {
-      //     console.log(
-      //       `[${chalk.yellow(
-      //         name
-      //       )} proxy] set impl logic from ${currentImpl} -> ${chalk.green(
-      //         jsonImpl
-      //       )}...`
-      //     );
-      //     let tx = await this.waitFor(
-      //       await proxyAdminContract.upgrade(manifest.proxy, jsonImpl)
-      //     );
-      //     console.log(`\t\t(TxId: ${chalk.blue(tx.hash || tx.tx)})`);
-      //   }
-      // }
-
-      // result = bind ? await contractOf(contract, proxy) : proxy
+      // result = bind ? await contractOf(contract, proxy) : proxy;
       result = await this.contractOf(contract, manifest.proxy);
     } else {
       result = await this.deploy(name, contract, manifest, ...implArgs);
@@ -243,6 +249,7 @@ class ContractDeployer {
       // for only hardhat
       const ethers = this.getEthers();
       const roleId = ethers.keccak256(ethers.toUtf8Bytes(role));
+      console.log("roleID", roleId);
 
       if (isGrant) {
         // Grant roles
@@ -486,12 +493,13 @@ class ContractDeployer {
   }
 
   async getImpl(proxy) {
-    const addr = await this.addressOf(proxy);
+    const addr = proxy;
     // let value = await hre.ethers.provider.getStorageAt(addr, '0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc')
     // value = value.replace('0x000000000000000000000000', '0x')
-    let contract = await this.proxyAdminContract();
-    let value = await contract.getProxyImplementation(addr);
-    return this.getWeb3().utils.toChecksumAddress(value);
+    // let contract = await this.proxyAdminContract();
+    // let value = await contract.getProxyImplementation(addr);
+    // return this.getWeb3().utils.toChecksumAddress(value);
+    return proxy;
   }
 
   async run(func) {
