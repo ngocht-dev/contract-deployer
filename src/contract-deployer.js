@@ -121,7 +121,7 @@ class ContractDeployer {
 
       if (utils.isNullOrEmpty(manifest.proxy)) {
         // initialize the proxy with given args
-        if (utils.isNullOrEmpty(manifest.impl)) { manifest.impl = this.addressOf(impl) }
+        if (utils.isNullOrEmpty(manifest.impl)) { manifest.impl = await this.addressOf(impl) }
         proxy.address = await this.addressOf(proxy);
         manifest.proxy = proxy.address
         this.writeJson(this.deployData)
@@ -352,12 +352,12 @@ class ContractDeployer {
 
   async updateProxyAdmin(proxy) {
     const proxyAdmin = await this.proxyAdminContract()
-    if (!(await proxyAdmin.isAdminOf(await this.addressOf(proxy)))) {
-      console.log(`\tUpdate proxy admin to ${this.proxyAdminName} contract...`, await this.addressOf(proxyAdmin))
-      const proxyContract = await this.contractOf(this.Proxy, await this.addressOf(proxy))
-      let tx = await this.waitFor(await proxyContract.changeAdmin(await this.addressOf(proxyAdmin)))
-      console.log(`\t\t(TxId: ${chalk.blue(tx.hash || tx.tx)})`)
-    }
+    // if (!(await proxyAdmin.isAdminOf(await this.addressOf(proxy)))) {
+    //   console.log(`\tUpdate proxy admin to ${this.proxyAdminName} contract...`, await this.addressOf(proxyAdmin))
+    //   const proxyContract = await this.contractOf(this.Proxy, await this.addressOf(proxy))
+    //   let tx = await this.waitFor(await proxyContract.changeAdmin(await this.addressOf(proxyAdmin)))
+    //   console.log(`\t\t(TxId: ${chalk.blue(tx.hash || tx.tx)})`)
+    // }
     return proxyAdmin
   }
 
@@ -377,10 +377,10 @@ class ContractDeployer {
 
   async getImpl(proxy) {
     const addr = await this.addressOf(proxy)
-    // let value = await hre.ethers.provider.getStorageAt(addr, '0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc')
+    let value = await ethers.provider.getStorageAt(addr, '0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc')
     // value = value.replace('0x000000000000000000000000', '0x')
-    let contract = await this.proxyAdminContract();
-    let value = await contract.getProxyImplementation(addr);
+    // let contract = await this.proxyAdminContract();
+    // let value = await contract.getProxyImplementation(addr);
     return this.getWeb3().utils.toChecksumAddress(value)
   }
 
