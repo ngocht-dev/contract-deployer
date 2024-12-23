@@ -279,3 +279,5 @@ npm run deploy:testnet
   })
 ```
     (*) Need to add MyLibrary to json file before the smart contract `MyGame`
+
+    test
