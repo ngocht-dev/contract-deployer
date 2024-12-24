@@ -137,7 +137,7 @@ class ContractDeployer {
         this.writeJson(this.deployData)
 
         console.log(`[${chalk.yellow(name)} proxy] set impl logic: ${chalk.green(manifest.impl)}...`)
-        let tx = await this.waitFor(await proxyAdminContract.upgrade(manifest.proxy, manifest.impl));
+        let tx = await this.waitFor(await proxyAdminContract.upgradeAndCall(manifest.proxy, manifest.impl, '0x'));
         console.log(`\t\t(TxId: ${chalk.blue(tx.hash || tx.tx)})`)
       } else {
         // checking if the impl contract is complied with the proxy
@@ -146,7 +146,7 @@ class ContractDeployer {
 
         if (currentImpl != jsonImpl) {
           console.log(`[${chalk.yellow(name)} proxy] set impl logic from ${currentImpl} -> ${chalk.green(jsonImpl)}...`)
-          let tx = await this.waitFor(await proxyAdminContract.upgrade(manifest.proxy, jsonImpl));
+          let tx = await this.waitFor(await proxyAdminContract.upgradeAndCall(manifest.proxy, jsonImpl, '0x'));
           console.log(`\t\t(TxId: ${chalk.blue(tx.hash || tx.tx)})`)
         }
       }
