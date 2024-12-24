@@ -151,10 +151,7 @@ class ContractDeployer {
         );
       }
 
-      let proxyAdress = proxy;
-      console.log(proxyAdress);
-
-      const proxyAdminContract = await this.updateProxyAdmin(proxyAdress);
+      const proxyAdminContract = await this.updateProxyAdmin(proxy);
 
       if (utils.isNullOrEmpty(manifest.proxy)) {
         // initialize the proxy with given args
@@ -204,7 +201,7 @@ class ContractDeployer {
               jsonImpl
             )}...`
           );
-          console.log(manifest.proxy, JSON.stringify(manifest.impl));
+
           let tx = await this.waitFor(
             await proxyAdminContract.upgradeAndCall(
               manifest.proxy,
@@ -255,7 +252,6 @@ class ContractDeployer {
         // Grant roles
         for (let idx = 0; idx < addresses.length; idx++) {
           let addr = addresses[idx];
-          console.log(addr);
           if (!utils.isNullOrEmpty(addr)) {
             const assigned = await contract.hasRole(roleId, addr);
             if (assigned) {
@@ -462,16 +458,16 @@ class ContractDeployer {
 
   async updateProxyAdmin(proxy) {
     const proxyAdmin = await this.proxyAdminContract();
-    // const proxyContract = await this.contractOf(this.Proxy, proxy);
-    // if ((await proxyContract.getAdmin()) != proxyAdmin) {
-    //   console.log(
-    //     `\tUpdate proxy admin to ${this.proxyAdminName} contract...`,
-    //     await this.addressOf(proxyAdmin)
-    //   );
+    const proxyContract = await this.contractOf(this.Proxy, proxy);
+    if ((await proxyContract.getAdmin()) != proxyAdmin) {
+      console.log(
+        `\tUpdate proxy admin to ${this.proxyAdminName} contract...`,
+        await this.addressOf(proxyAdmin)
+      );
 
-    //   let tx = await this.waitFor(await proxyContract.changeAdmin(proxyAdmin));
-    //   console.log(`\t\t(TxId: ${chalk.blue(tx.hash || tx.tx)})`);
-    // }
+      let tx = await this.waitFor(await proxyContract.changeAdmin(proxyAdmin));
+      console.log(`\t\t(TxId: ${chalk.blue(tx.hash || tx.tx)})`);
+    }
     return proxyAdmin;
   }
 
@@ -494,7 +490,10 @@ class ContractDeployer {
 
   async getImpl(proxy) {
     const addr = proxy;
-    let value = await hre.ethers.provider.getStorage(addr, '0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc')
+    let value = await hre.ethers.provider.getStorage(
+      addr,
+      "0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc"
+    );
     // value = value.replace('0x000000000000000000000000', '0x')
     // let contract = await this.proxyAdminContract();
     // let value = await contract.getProxyImplementation(addr);

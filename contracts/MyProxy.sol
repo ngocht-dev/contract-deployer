@@ -68,6 +68,7 @@ contract MyProxy is ERC1967Proxy {
     // This is acceptable if the admin is always a ProxyAdmin instance or similar contract
     // with its own ability to transfer the permissions to another account.
     address private _admin;
+    address private _owner;
 
     /**
      * @dev The proxy caller is the current admin, and can't fallback to the proxy target.
@@ -81,11 +82,12 @@ contract MyProxy is ERC1967Proxy {
      */
     constructor(
         address _logic,
-        address initialOwner
+        address admin_
     ) payable ERC1967Proxy(_logic, bytes("")) {
-        _admin = address(new MyProxyAdmin(initialOwner));
+        _admin = admin_;
         // Set the storage value and emit an event for ERC-1967 compatibility
         ERC1967Utils.changeAdmin(_proxyAdmin());
+        _owner = msg.sender;
     }
 
     /**
@@ -97,10 +99,11 @@ contract MyProxy is ERC1967Proxy {
 
     function changeAdmin(address newAdmin) public {
         require(
-            msg.sender == _proxyAdmin(),
+            _owner == msg.sender,
             ERC1967Utils.ERC1967InvalidAdmin(msg.sender)
         );
         _admin = newAdmin;
+        ERC1967Utils.changeAdmin(newAdmin);
     }
 
     function getAdmin() public view returns (address) {
@@ -140,6 +143,8 @@ contract MyProxy is ERC1967Proxy {
         ERC1967Utils.upgradeToAndCall(newImplementation, data);
     }
 
-    // Receive function to accept ether
+    /**
+     * @dev Receive function to accept Ether transfers.
+     */
     receive() external payable {}
 }

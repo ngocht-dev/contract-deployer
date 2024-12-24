@@ -1,13 +1,13 @@
 {
     "contracts": {
-        "DmtpProxyAdmin": "0xeA6Ca25294C2D4864D3B4c8FA15b2c25AaD23095",
+        "DmtpProxyAdmin": "0x98DbEEfd358CCC8549b195B9dAD8fCE7D2A29943",
         "Key": {
-            "proxy": "0x6c274DAe23b0451D852da992d124D0A56a473841",
-            "impl": "0xc1C061B42933E9fCF7a6E7C01Fdec7F8449d3e30"
+            "proxy": "0x5FA3Ed76d36ef7277089567E7aab8434d5286aa8",
+            "impl": "0x0cc7Ff8C981e78cf47Ccc2c562698351b7Ae33aF"
         },
         "DmtpTech": {
-            "proxy": "0x1f3E8782DBf55fec2B38Cb4980297704CC6F2Db2",
-            "impl": "0xe3f0fDbf1932BbD49F791D658E1a79ca0304bB8C"
+            "proxy": "0x39E2b6b88FDE3D483E46Fd791399d5CA4fCb718c",
+            "impl": "0xeFB58ABe65874cEb46161c74900b59D5b319794A"
         }
     },
     "mapping": {},
