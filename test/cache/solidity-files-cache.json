@@ -3170,8 +3170,8 @@
       ]
     },
     "/Users/thinhnguyen/Documents/workspace/ngoc/contract-deployer/test/contracts/proxy/DmtpProxy.sol": {
-      "lastModificationDate": 1735009424184,
-      "contentHash": "9558d0bedc48933ab2141ccf43c1360a",
+      "lastModificationDate": 1735011813554,
+      "contentHash": "79acb8a7c4a9446afab28c1fd5d36ec1",
       "sourceName": "contracts/proxy/DmtpProxy.sol",
       "solcConfig": {
         "version": "0.8.28",

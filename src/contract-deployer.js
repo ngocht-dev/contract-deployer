@@ -159,7 +159,7 @@ class ContractDeployer {
       if (utils.isNullOrEmpty(manifest.proxy)) {
         // initialize the proxy with given args
         if (utils.isNullOrEmpty(manifest.impl)) {
-          manifest.impl = this.addressOf(impl);
+          manifest.impl = await this.addressOf(impl);
         }
         proxy.address = await this.addressOf(proxy);
         manifest.proxy = proxy.address;
@@ -178,14 +178,12 @@ class ContractDeployer {
         // update the new impl contract for the proxy
         manifest.impl = await this.addressOf(impl);
         manifest.proxy = await this.addressOf(proxy);
-        console.log(manifest.proxy, manifest.impl);
         this.writeJson(this.deployData);
         console.log(
           `[${chalk.yellow(name)} proxy] set impl logic: ${chalk.green(
             manifest.impl
           )}...`
         );
-        console.log(manifest.proxy, manifest.impl);
         let tx = await this.waitFor(
           await proxyAdminContract.upgradeAndCall(
             manifest.proxy,

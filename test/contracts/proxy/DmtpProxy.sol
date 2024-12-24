@@ -55,6 +55,7 @@ contract DmtpProxy is ERC1967Proxy {
     // This is acceptable if the admin is always a ProxyAdmin instance or similar contract
     // with its own ability to transfer the permissions to another account.
     address private _admin;
+    address public _initialOwner;
 
     /**
      * @dev The proxy caller is the current admin, and can't fallback to the proxy target.
@@ -73,6 +74,7 @@ contract DmtpProxy is ERC1967Proxy {
         _admin = address(new DmtpProxyAdmin(initialOwner));
         // Set the storage value and emit an event for ERC-1967 compatibility
         ERC1967Utils.changeAdmin(_proxyAdmin());
+        _initialOwner = initialOwner;
     }
 
     /**
@@ -84,10 +86,11 @@ contract DmtpProxy is ERC1967Proxy {
 
     function changeAdmin(address newAdmin) public {
         // require(
-        //     msg.sender == _proxyAdmin(),
+        //     _initialOwner == msg.sender,
         //     ERC1967Utils.ERC1967InvalidAdmin(msg.sender)
         // );
         _admin = newAdmin;
+        ERC1967Utils.changeAdmin(newAdmin);
     }
 
     function getAdmin() public view returns (address) {
