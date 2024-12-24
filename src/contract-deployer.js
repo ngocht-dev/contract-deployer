@@ -178,12 +178,14 @@ class ContractDeployer {
         // update the new impl contract for the proxy
         manifest.impl = await this.addressOf(impl);
         manifest.proxy = await this.addressOf(proxy);
+        console.log(manifest.proxy, manifest.impl);
         this.writeJson(this.deployData);
         console.log(
           `[${chalk.yellow(name)} proxy] set impl logic: ${chalk.green(
             manifest.impl
           )}...`
         );
+        console.log(manifest.proxy, manifest.impl);
         let tx = await this.waitFor(
           await proxyAdminContract.upgradeAndCall(
             manifest.proxy,
@@ -462,13 +464,13 @@ class ContractDeployer {
 
   async updateProxyAdmin(proxy) {
     const proxyAdmin = await this.proxyAdminContract();
-    console.log("proxyAdmin", proxy);
-    if (!(await proxyAdmin.isAdminOf(proxy))) {
+    const proxyContract = await this.contractOf(this.Proxy, proxy);
+    if ((await proxyContract.getAdmin()) != proxyAdmin) {
       console.log(
         `\tUpdate proxy admin to ${this.proxyAdminName} contract...`,
         await this.addressOf(proxyAdmin)
       );
-      const proxyContract = await this.contractOf(this.Proxy, proxy);
+
       let tx = await this.waitFor(await proxyContract.changeAdmin(proxyAdmin));
       console.log(`\t\t(TxId: ${chalk.blue(tx.hash || tx.tx)})`);
     }
