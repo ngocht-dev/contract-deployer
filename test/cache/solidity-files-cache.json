@@ -2,8 +2,8 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "/Users/thinhnguyen/Documents/workspace/ngoc/contract-deployer/test/contracts/DmtpTech.sol": {
-      "lastModificationDate": 1734943209177,
-      "contentHash": "44301e9ca48d872085b81622c22be687",
+      "lastModificationDate": 1735032453069,
+      "contentHash": "7238287e3a85460842609fe5b8cdfba2",
       "sourceName": "contracts/DmtpTech.sol",
       "solcConfig": {
         "version": "0.8.28",

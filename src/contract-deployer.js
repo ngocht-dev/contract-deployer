@@ -459,7 +459,9 @@ class ContractDeployer {
   async updateProxyAdmin(proxy) {
     const proxyAdmin = await this.proxyAdminContract();
     const proxyContract = await this.contractOf(this.Proxy, proxy);
-    if ((await proxyContract.getAdmin()) != proxyAdmin) {
+    if (
+      (await proxyContract.getAdmin()) != (await this.addressOf(proxyAdmin))
+    ) {
       console.log(
         `\tUpdate proxy admin to ${this.proxyAdminName} contract...`,
         await this.addressOf(proxyAdmin)
@@ -489,16 +491,15 @@ class ContractDeployer {
   }
 
   async getImpl(proxy) {
-    const addr = proxy;
     let value = await hre.ethers.provider.getStorage(
-      addr,
+      proxy,
       "0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc"
     );
     // value = value.replace('0x000000000000000000000000', '0x')
     // let contract = await this.proxyAdminContract();
     // let value = await contract.getProxyImplementation(addr);
     // return this.getWeb3().utils.toChecksumAddress(value);
-    return proxy;
+    return value;
   }
 
   async run(func) {
